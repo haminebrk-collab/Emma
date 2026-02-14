@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Pour Emma</title>
+
+<style>
+:root{
+  --bg:#0b0d12;
+  --bg2:#0f1320;
+  --text:#eef1ff;
+  --muted:rgba(238,241,255,.72);
+  --soft:rgba(238,241,255,.12);
+  --glow:rgba(200,220,255,.22);
+  --radius:18px;
+  --shadow:0 14px 60px rgba(0,0,0,.45);
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;
+  color:var(--text);
+  background:
+    radial-gradient(1200px 700px at 50% 20%, rgba(140,170,255,.14), transparent 60%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+  overflow-x:hidden;
+}
+canvas{position:fixed;inset:0;z-index:0;pointer-events:none;}
+.wrap{position:relative;z-index:1;min-height:100%;display:flex;align-items:center;justify-content:center;padding:clamp(14px,3vw,22px);}
+.card{width:min(860px,100%);border:1px solid var(--soft);background:rgba(255,255,255,.04);backdrop-filter:blur(10px);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;}
+.topbar{display:flex;justify-content:space-between;gap:10px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px;color:var(--muted);}
+.pages{position:relative;height:min(560px, calc(100svh - 140px));}
+.page{position:absolute;inset:0;padding:clamp(18px,4vw,28px);display:flex;flex-direction:column;justify-content:center;gap:16px;opacity:0;transform:translateY(10px);pointer-events:none;transition:opacity .55s ease, transform .55s ease;}
+.page.active{opacity:1;transform:translateY(0);pointer-events:auto;}
+.headline{font-size:clamp(30px,6vw,52px);margin:0;letter-spacing:-.02em;text-shadow:0 0 40px var(--glow);}
+.sub{font-size:clamp(14px,2.2vw,16px);line-height:1.75;color:var(--muted);margin:0;max-width:60ch;}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+.btn{border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.06);color:var(--text);padding:12px 18px;border-radius:999px;cursor:pointer;font-weight:700;transition:.2s ease;min-height:44px;}
+.btn:hover{background:rgba(255,255,255,.12);}
+.primary{background:rgba(170,210,255,.2);border-color:rgba(190,220,255,.4);}
+.panel{margin-top:8px;border-radius:var(--radius);border:1px solid rgba(255,255,255,.1);background:rgba(0,0,0,.2);padding:16px;}
+.type{white-space:pre-wrap;line-height:1.85;margin:0;}
+.footer{display:flex;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;color:rgba(238,241,255,.55);}
+.mini{font-size:12.5px;color:var(--muted);line-height:1.6;margin:0;}
+.pill{display:inline-flex;align-items:center;gap:10px;padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);width:fit-content;}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(190,220,255,.75);box-shadow:0 0 16px rgba(190,220,255,.45);}
+@media (max-width:380px){.pages{height:min(620px, calc(100svh - 140px));}.btn{width:100%;}}
+</style>
+</head>
+
+<body>
+<canvas id="stars"></canvas>
+
+<div class="wrap">
+  <div class="card">
+    <div class="topbar">
+      <div id="hint">Un petit truc pour toi</div>
+      <div id="pageIndicator">1 / 4</div>
+    </div>
+
+    <div class="pages">
+      <section class="page active" id="p1">
+        <h1 class="headline">Emma.</h1>
+        <p class="sub">Avant de commencer… mets le son si tu peux.</p>
+
+        <div class="panel">
+          <div class="pill">
+            <div class="dot" aria-hidden="true"></div>
+            <div>
+              <div style="font-weight:800">All I Need — Radiohead</div>
+              <div class="mini">Clique une fois, la musique démarre au bon moment.</div>
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:14px">
+            <button class="btn primary" id="musicStart">▶︎ Lancer</button>
+            <button class="btn" id="musicSkip">Continuer sans</button>
+          </div>
+
+          <div class="row" style="margin-top:10px">
+            <button class="btn" id="toggle" style="display:none">Pause / Reprendre</button>
+            <button class="btn" id="softer" style="display:none">Plus doux</button>
+          </div>
+
+          <p class="mini" style="margin-top:10px;">
+          </p>
+        </div>
+      </section>
+
+      <section class="page" id="p2">
+        <h2 class="headline" style="font-size:clamp(24px,5vw,38px)">J’avais envie de te dire…</h2>
+        <div class="panel"><p class="type" id="typeTarget"></p></div>
+        <div class="row">
+          <button class="btn primary" id="go2">Continue</button>
+          <button class="btn" id="back1">Retour</button>
+        </div>
+      </section>
+
+      <section class="page" id="p3">
+        <h2 class="headline" style="font-size:clamp(24px,5vw,38px)">Juste un détail…</h2>
+        <p class="sub">
+          Je sais pas pourquoi, mais à chaque fois que j’entends cette chanson,
+          je pense à toi sweetie.
+        </p>
+
+        <div class="panel">
+          <p class="mini" style="margin:0;">Tu peux mettre pause ou baisser le son quand tu veux.</p>
+          <div class="row" style="margin-top:12px">
+            <button class="btn" id="toggle2">Pause / Reprendre</button>
+            <button class="btn" id="softer2">Plus doux</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <button class="btn primary" id="go3">Encore un truc</button>
+          <button class="btn" id="back2">Retour</button>
+        </div>
+      </section>
+
+      <section class="page" id="p4">
+        <h2 class="headline">Pour toi, Emma.</h2>
+        <p class="sub">
+          Je sais peut etre pas parfaitement m'exprimer<br>
+          mais je sais une chose c'est que je t'aime Emma.
+        </p>
+        <div class="row">
+          <button class="btn primary" id="replay">Revoir</button>
+        </div>
+      </section>
+    </div>
+
+    <div class="footer">
+      <div>Fait avec calme.</div>
+      <div>Saint-Valentin</div>
+    </div>
+  </div>
+</div>
+
+<audio id="bgMusic" src="music.mp3" preload="auto"></audio>
+
+<script>
+const pages=[...document.querySelectorAll(".page")];
+const indicator=document.getElementById("pageIndicator");
+const hint=document.getElementById("hint");
+
+function show(i){
+  pages.forEach((p,idx)=>p.classList.toggle("active",idx===i));
+  indicator.textContent=(i+1)+" / 4";
+  hint.textContent=["Un petit truc pour toi","Quelques mots","Juste un détail","C’est tout"][i];
+}
+
+const message=`Je sais pas trop si je suis doué pour dire les choses…
+
+mais aujourd’hui j’avais envie d’être honnête.
+
+T’es l'amour qui me fait sourire a chaque message,
+même quand la journée est nul.
+
+Et ça me fait battre le coeur,
+parce que je t'aime.
+
+Bonne Saint-Valentin, Emma.`;
+
+let idx=0, started=false, timer=null;
+const target=document.getElementById("typeTarget");
+
+function resetType(){
+  started=false; idx=0;
+  clearTimeout(timer);
+  target.textContent="";
+}
+function startType(){
+  if(started) return;
+  started=true;
+  tick();
+}
+function tick(){
+  target.textContent=message.slice(0,idx++);
+  if(idx<=message.length) timer=setTimeout(tick, 22);
+}
+
+const bg = document.getElementById("bgMusic");
+
+const startTime = 159; // 2:39
+const endTime   = 179; // 2:59 (tu peux changer si tu veux plus long)
+
+const targetVol = 0.40;
+let fadeTimer = null;
+
+function fadeIn(){
+  clearInterval(fadeTimer);
+  bg.volume = 0.08;
+  let v = bg.volume;
+  fadeTimer = setInterval(()=>{
+    if(bg.paused){ clearInterval(fadeTimer); return; }
+    v += 0.02;
+    bg.volume = Math.min(targetVol, v);
+    if(v >= targetVol) clearInterval(fadeTimer);
+  }, 110);
+}
+
+async function startMusic(){
+  try{
+    bg.currentTime = startTime;
+    await bg.play();
+    fadeIn();
+  }catch(e){}
+}
+
+bg.addEventListener("timeupdate", ()=>{
+  if(bg.currentTime >= endTime){
+    bg.removeEventListener("timeupdate", arguments.callee);
+  }
+});
+
+
+function syncControls(){
+  const t = bg.paused ? "Reprendre" : "Pause";
+  document.getElementById("toggle").textContent = t;
+  document.getElementById("toggle2").textContent = t;
+}
+
+async function toggleMusic(){
+  try{
+    if(bg.paused){
+      await bg.play();
+      fadeIn();
+    }else{
+      bg.pause();
+    }
+    syncControls();
+  }catch(e){}
+}
+
+function softer(){
+  bg.volume = Math.max(0.12, bg.volume - 0.12);
+}
+
+const startBtn=document.getElementById("musicStart");
+const skipBtn=document.getElementById("musicSkip");
+
+startBtn.addEventListener("click", async ()=>{
+  await startMusic();
+  document.getElementById("toggle").style.display="inline-flex";
+  document.getElementById("softer").style.display="inline-flex";
+  syncControls();
+  show(1);
+  startType();
+});
+
+skipBtn.addEventListener("click", ()=>{
+  show(1);
+  startType();
+});
+
+document.getElementById("toggle").addEventListener("click", toggleMusic);
+document.getElementById("toggle2").addEventListener("click", toggleMusic);
+
+document.getElementById("softer").addEventListener("click", softer);
+document.getElementById("softer2").addEventListener("click", softer);
+
+document.getElementById("go2").addEventListener("click", ()=>show(2));
+document.getElementById("go3").addEventListener("click", ()=>show(3));
+document.getElementById("back1").addEventListener("click", ()=>show(0));
+document.getElementById("back2").addEventListener("click", ()=>show(1));
+document.getElementById("replay").addEventListener("click", ()=>{ resetType(); show(0); syncControls(); });
+
+const canvas=document.getElementById("stars");
+const ctx=canvas.getContext("2d");
+let W,H,stars;
+
+function resize(){
+  const dpr=Math.max(1, window.devicePixelRatio || 1);
+  W=canvas.width=Math.floor(window.innerWidth*dpr);
+  H=canvas.height=Math.floor(window.innerHeight*dpr);
+  canvas.style.width=window.innerWidth+"px";
+  canvas.style.height=window.innerHeight+"px";
+  stars=new Array(140).fill(0).map(()=>({
+    x:Math.random()*W,
+    y:Math.random()*H,
+    r:(Math.random()*1.4+0.2)*dpr,
+    v:(Math.random()*0.35+0.08)*dpr
+  }));
+}
+window.addEventListener("resize", resize);
+resize();
+
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle="#eef1ff";
+  for(const s of stars){
+    ctx.globalAlpha=0.65;
+    ctx.beginPath();
+    ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+    ctx.fill();
+    s.y+=s.v;
+    if(s.y>H){ s.y=-10; s.x=Math.random()*W; }
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+syncControls();
+</script>
+
+</body>
+</html>
